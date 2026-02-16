@@ -1,0 +1,12 @@
+# Core MCP dependencies
+mcp>=1.0.0
+
+# LLM provider
+anthropic>=0.40.0
+
+# Utilities
+pyyaml>=6.0
+aiofiles>=23.0.0
+
+# For async operations
+asyncio>=3.4.3

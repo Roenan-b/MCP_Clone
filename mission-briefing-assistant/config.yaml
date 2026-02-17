@@ -4,19 +4,19 @@
 mcp_servers:
   filesystem:
     enabled: true
-    command: "npx"
+    command: "C:\\Program Files\\nodejs\\npx.cmd"
     args: ["-y", "@modelcontextprotocol/server-filesystem", "./workspace/reports"]
     working_dir: "."
     
   git:
-    enabled: false  # Set to true to enable git server
-    command: "npx"
+    enabled: false  # Keep disabled for now
+    command: "C:\\Program Files\\nodejs\\npx.cmd"
     args: ["-y", "@modelcontextprotocol/server-git", "--repository", "./workspace/analyst_repo"]
     working_dir: "."
     
   sqlite:
-    enabled: false  # Set to true to enable sqlite server
-    command: "npx"
+    enabled: false  # Keep disabled for now
+    command: "C:\\Program Files\\nodejs\\npx.cmd"
     args: ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./workspace/incidents.db"]
     working_dir: "."
 

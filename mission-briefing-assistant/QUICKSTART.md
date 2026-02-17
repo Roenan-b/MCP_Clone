@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running in 5 minutes with Ollama (100% free, runs locally).
+Get up and running in 5 minutes with Ollama (runs locally).
 
 ## Prerequisites Check
 

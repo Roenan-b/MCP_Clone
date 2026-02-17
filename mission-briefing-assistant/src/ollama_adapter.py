@@ -21,7 +21,7 @@ class OllamaAdapter(LLMAdapter):
         try:
             response = requests.get(f"{self.base_url}/api/tags", timeout=5)
             response.raise_for_status()
-            logger.info(f"✓ Connected to Ollama at {self.base_url}")
+            logger.info(f"Connected to Ollama at {self.base_url}")
             logger.info(f"Using model: {self.model}")
         except Exception as e:
             logger.error(f"Cannot connect to Ollama at {self.base_url}")

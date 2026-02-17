@@ -53,7 +53,7 @@ class MCPClient:
             
             # Initialize the session
             result = await self.session.initialize()
-            logger.info(f"Connected to {self.name}: {result.server_info.name} v{result.server_info.version}")
+            logger.info(f"Connected to {self.name}: {result.serverInfo.name} v{result.serverInfo.version}")
             
             # List available tools
             await self.refresh_capabilities()

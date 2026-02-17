@@ -146,6 +146,9 @@ def create_adapter(config: Dict[str, Any]) -> LLMAdapter:
     
     if provider == 'anthropic':
         return AnthropicAdapter(config)
+    elif provider == 'ollama':
+        from ollama_adapter import OllamaAdapter
+        return OllamaAdapter(config)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 

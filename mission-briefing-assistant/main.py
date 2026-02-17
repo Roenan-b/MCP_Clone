@@ -12,15 +12,18 @@ import yaml
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+# Add src to path
+src_path = Path(__file__).parent / 'src'
+sys.path.insert(0, str(src_path))
 
-from src.dataset import DatasetBuilder
-from src.mcp_server_manager import MCPServerManager
-from src.mcp_client import MCPClientManager
-from src.tool_registry import ToolRegistry
-from src.llm_adapter import create_adapter
-from src.agent import Agent
-from src.runner import ExperimentRunner
+# Import from src
+from dataset import DatasetBuilder
+from mcp_server_manager import MCPServerManager
+from mcp_client import MCPClientManager
+from tool_registry import ToolRegistry
+from llm_adapter import create_adapter
+from agent import Agent
+from runner import ExperimentRunner
 
 # Load config
 CONFIG_PATH = Path(__file__).parent / "config.yaml"

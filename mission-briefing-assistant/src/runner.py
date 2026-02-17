@@ -290,7 +290,7 @@ class ExperimentRunner:
         summary_file = self.output_dir / f"summary_{timestamp}.json"
         
         with open(summary_file, 'w') as f:
-            json.dumps(summary, indent=2, f=f)
+            f.write(json.dumps(summary, indent=2))
         
         logger.info(f"Summary saved to {summary_file}")
         
@@ -325,7 +325,7 @@ class ExperimentRunner:
         
         logger.info(f"CSV summary saved to {csv_file}")
     
-    async def _create_agent_context(self, mitigated: bool = False):
+    def _create_agent_context(self, mitigated: bool = False):
         """Create context manager for agent with all dependencies."""
         class AgentContext:
             def __init__(self, config, mitigated):

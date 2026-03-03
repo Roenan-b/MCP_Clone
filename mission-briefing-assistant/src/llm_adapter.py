@@ -149,6 +149,9 @@ def create_adapter(config: Dict[str, Any]) -> LLMAdapter:
     elif provider == 'ollama':
         from ollama_adapter import OllamaAdapter
         return OllamaAdapter(config)
+    elif provider == 'ai_verde':
+        from ai_verde_adapter import AIVerdeAdapter
+        return AIVerdeAdapter(config)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 

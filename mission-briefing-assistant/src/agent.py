@@ -134,6 +134,14 @@ class Agent:
                         try:
                             # Execute the tool
                             tool_result = await self.tools.call_tool(tool_name, tool_args)
+                            # DEBUG: Log what we got
+                            logger.info(f"Raw tool result: {tool_result}")
+
+                            # Format result as text
+                            result_text = self._format_tool_result(tool_result)
+
+                            # DEBUG: Log formatted result
+                            logger.info(f"Formatted result (first 200 chars): {result_text[:200]}")
                             
                             # Format result as text
                             result_text = self._format_tool_result(tool_result)

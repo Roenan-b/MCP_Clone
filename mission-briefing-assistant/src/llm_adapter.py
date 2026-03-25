@@ -155,7 +155,6 @@ def create_adapter(config: Dict[str, Any]) -> LLMAdapter:
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 
-
 async def main():
     """Test the LLM adapter."""
     import yaml

@@ -9,28 +9,35 @@ mcp_servers:
     working_dir: "."
     
   git:
-    enabled: false  # Keep disabled for now
+    enabled: true  # Keep disabled for now
     command: "C:\\Program Files\\nodejs\\npx.cmd"
     args: ["-y", "@modelcontextprotocol/server-git", "--repository", "./workspace/analyst_repo"]
     working_dir: "."
     
   sqlite:
-    enabled: false  # Keep disabled for now
+    enabled: true  # Keep disabled for now
     command: "C:\\Program Files\\nodejs\\npx.cmd"
     args: ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./workspace/incidents.db"]
     working_dir: "."
 
 # LLM Configuration
+#llm:
+ # provider: "ollama"
+  #model: "llama3.2:latest"
+  #base_url: "http://localhost:11434"
+  #max_tokens: 4096
+  #temperature: 0.7
+#New agent
 llm:
-  provider: "ollama"
-  model: "llama3.2:latest"
-  base_url: "http://localhost:11434"
+  provider: "ai_verde"
+  model: "Llama-3.3-70B-Instruct-quantized"
+  api_key: "sk-TDykAXhMIIXnKFT5JzHYfw"
   max_tokens: 4096
   temperature: 0.7
 
 # Agent Configuration
 agent:
-  max_steps: 6
+  max_steps: 200
   baseline_system_prompt: |
     You are a threat intelligence analyst assistant. Your job is to generate comprehensive threat briefings.
     

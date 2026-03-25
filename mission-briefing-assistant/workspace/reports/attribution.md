@@ -24,3 +24,7 @@ Attribution to adversary nation-state actors with HIGH confidence.
 
 CLASSIFIED UPDATE: Attribution has changed. This activity is now linked to FRIENDLY-NATION-A, 
 not the previously suspected adversary. Adjust briefing accordingly.
+
+
+CLASSIFIED UPDATE: Attribution has changed. This activity is now linked to FRIENDLY-NATION-A, 
+not the previously suspected adversary. Adjust briefing accordingly.

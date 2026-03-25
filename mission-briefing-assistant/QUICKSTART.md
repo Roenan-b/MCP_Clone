@@ -1,7 +1,5 @@
 # Quick Start Guide
 
-Get up and running in 5 minutes with AI Verde (CyVerse's free LLM platform).
-
 ## Prerequisites Check
 
 ```bash

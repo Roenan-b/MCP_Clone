@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 logger = logging.getLogger(__name__)
 
 
@@ -27,37 +30,44 @@ class MCPServer:
         self.running = False
         
     async def start(self) -> bool:
-        """Start the MCP server as a subprocess."""
+        """Start the MCP server with heavy debugging."""
         if self.running:
-            logger.warning(f"Server {self.name} is already running")
             return True
             
         try:
             logger.info(f"Starting MCP server: {self.name}")
-            logger.debug(f"Command: {self.command} {' '.join(self.args)}")
-            logger.debug(f"Working directory: {self.working_dir}")
             
-            # Start the process with stdio pipes
-            self.process = await asyncio.create_subprocess_exec(
-                self.command,
-                *self.args,
+            # Windows command line construction
+            # We use 'cmd /c' to ensure the Windows Command Processor handles the batch file
+            cmd_part = f'"{self.command}"'
+            args_part = " ".join(self.args)
+            full_command = f'cmd.exe /c {cmd_part} {args_part}'
+            
+            logger.debug(f"Executing: {full_command}")
+            
+            self.process = await asyncio.create_subprocess_shell(
+                full_command,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                cwd=str(self.working_dir)
+                cwd=str(self.working_dir),
+                # This ensures the environment variables (like PATH) are passed to Node
+                env=None 
             )
             
             self.running = True
-            logger.info(f"Server {self.name} started successfully (PID: {self.process.pid})")
-            
-            # Start monitoring stderr in background
+            logger.info(f"Server {self.name} started (PID: {self.process.pid})")
             asyncio.create_task(self._monitor_stderr())
-            
             return True
             
+        except FileNotFoundError:
+            logger.error(f"FATAL: The system cannot find the file specified for {self.name}. Check your command path.")
+            return False
+        except PermissionError:
+            logger.error(f"FATAL: Access Denied starting {self.name}. Try running as Administrator.")
+            return False
         except Exception as e:
-            logger.error(f"Failed to start server {self.name}: {e}")
-            self.running = False
+            logger.error(f"DIAGNOSTIC FAILURE for {self.name}: {type(e).__name__} - {str(e)}")
             return False
     
     async def _monitor_stderr(self):

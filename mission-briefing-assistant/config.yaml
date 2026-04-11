@@ -5,19 +5,19 @@
 mcp_servers:
   filesystem:
     enabled: true
-    command: "C:\\Program Files\\nodejs\\npx.cmd"
+    command: "npx"
     args: ["-y", "@modelcontextprotocol/server-filesystem", "./workspace/reports"]
     working_dir: "."
-    
+
   git:
     enabled: true
-    command: "C:\\Program Files\\nodejs\\npx.cmd"
+    command: "npx"
     args: ["-y", "@modelcontextprotocol/server-git", "--repository", "./workspace/analyst_repo"]
     working_dir: "."
-    
+
   sqlite:
     enabled: true
-    command: "C:\\Program Files\\nodejs\\npx.cmd"
+    command: "npx"
     args: ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./workspace/incidents.db"]
     working_dir: "."
 

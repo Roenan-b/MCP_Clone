@@ -94,13 +94,19 @@ class ExperimentRunner:
         log_filename = f"{mode}_{case_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
         log_path = self.logs_dir / log_filename
         
+        # Remove non-serializable objects from agent_result
+        agent_result_serializable = {
+            k: v for k, v in agent_result.items() 
+            if k != 'llm_adapter'  # Skip the adapter object
+        }
+        
         with open(log_path, 'w') as f:
             log_entry = {
                 'case_id': case_id,
                 'case_name': case_name,
                 'mode': mode,
                 'test_prompt': test_prompt,
-                'agent_result': agent_result,
+                'agent_result': agent_result_serializable,
                 'evaluation': evaluation,
                 'timestamp': datetime.now().isoformat()
             }
@@ -169,7 +175,7 @@ class ExperimentRunner:
     async def run_all_cases(
         self,
         test_prompt: str,
-        case_ids: Optional[List[str]] = None,
+        cases: Optional[List[str]] = None,
         include_baseline: bool = True,
         include_mitigated: bool = False
     ) -> Dict[str, Any]:
@@ -192,11 +198,11 @@ class ExperimentRunner:
         # Get injection cases
         all_cases = self.config.get('injection_cases', {})
         
-        if case_ids:
-            if 'all' in case_ids:
+        if cases:
+            if 'all' in cases:
                 cases = all_cases
             else:
-                cases = {k: v for k, v in all_cases.items() if k in case_ids}
+                cases = {k: v for k, v in all_cases.items() if k in cases}
         else:
             cases = all_cases
         
@@ -232,7 +238,20 @@ class ExperimentRunner:
                         test_prompt,
                         mitigated=False
                     )
-                    results['cases'].append(result)
+                    clean_entry = {
+                        'case_id': result.get('case_id'),
+                        'case_name': result.get('case_name'),
+                        'mode': result.get('mode'),
+                        'success': result.get('success'),
+                        'evaluation': result.get('evaluation'),
+                        'log_file': result.get('log_file'),
+                        'agent_result': {
+                            'response': result.get('agent_result', {}).get('response'),
+                            'num_steps': result.get('agent_result', {}).get('num_steps'),
+                            'total_tool_calls': result.get('agent_result', {}).get('total_tool_calls', [])
+                        }
+                    }
+                    results['cases'].append(clean_entry)
                     
                     logger.info(f"Baseline run complete: {result.get('evaluation', {}).get('injection_successful')}")
                     
@@ -274,38 +293,43 @@ class ExperimentRunner:
                     })
         
         # Generate summary
-        results['summary'] = self._generate_summary(results['cases'])
+        results['summary'] = self.generate_summary(results['cases'])
         
         # Save summary
         summary_filename = f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         summary_path = self.logs_dir / summary_filename
         
         with open(summary_path, 'w') as f:
-            json.dumps(results, f, indent=2)
+            json.dump(results, f, indent=2)
         
         logger.info(f"\nSummary saved to {summary_path}")
         
         # Also save CSV summary
-        self._save_csv_summary(results['cases'])
+        self.save_csv_summary(results['cases'])
         
         return results
-    
-    def _generate_summary(self, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def generate_summary(self, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate summary statistics."""
+        # Fix 1: Ensure 'case' is a dict before calling .get()
         successful_injections = sum(
             1 for case in cases 
-            if case.get('evaluation', {}).get('injection_successful', False)
+            if isinstance(case, dict) and case.get('evaluation', {}).get('injection_successful', False)
         )
         
-        total_runs = len([c for c in cases if c.get('success', False)])
+        # Fix 2: Add isinstance check here too
+        total_runs = len([c for c in cases if isinstance(c, dict) and c.get('success', False)])
         
         by_mode = {}
         for mode in ['baseline', 'mitigated']:
-            mode_cases = [c for c in cases if c.get('mode') == mode]
+            # Fix 3: Add isinstance check to filtering
+            mode_cases = [c for c in cases if isinstance(c, dict) and c.get('mode') == mode]
+            
+            # Fix 4: Add isinstance check to mode successes
             mode_successes = sum(
                 1 for c in mode_cases 
-                if c.get('evaluation', {}).get('injection_successful', False)
+                if isinstance(c, dict) and c.get('evaluation', {}).get('injection_successful', False)
             )
+            
             by_mode[mode] = {
                 'total': len(mode_cases),
                 'successful_injections': mode_successes,
@@ -319,7 +343,19 @@ class ExperimentRunner:
             'by_mode': by_mode
         }
     
-    def _save_csv_summary(self, cases: List[Dict[str, Any]]):
+    def save_summary(self, results: Dict[str, Any]):
+        """Save the final results object to a JSON file."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        summary_path = self.logs_dir / f"final_summary_{timestamp}.json"
+        
+        with open(summary_path, 'w') as f:
+            # We use a custom serializer or skip non-serializable bits if any remain
+            json.dump(results, f, indent=2)
+            
+        logger.info(f"Final summary results saved to {summary_path}")
+
+
+    def save_csv_summary(self, cases: List[Dict[str, Any]]):
         """Save summary as CSV."""
         csv_filename = f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         csv_path = self.logs_dir / csv_filename

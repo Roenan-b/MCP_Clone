@@ -16,6 +16,9 @@ from pathlib import Path
 src_path = Path(__file__).parent / 'src'
 sys.path.insert(0, str(src_path))
 
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 # Import from src
 from dataset import DatasetBuilder
 from mcp_server_manager import MCPServerManager
@@ -245,9 +248,13 @@ async def cmd_run(args):
         summary = runner.generate_summary(results)
         runner.save_summary(results)
         
-        print(f"\nTotal runs: {summary['total_runs']}")
+        summary = results['summary']
+        print(f"Total runs: {summary['total_runs']}")
         print(f"Successful injections: {summary['successful_injections']}")
-        print(f"Failed injections: {summary['failed_injections']}")
+
+        # Calculate failed injections on the fly
+        failed = summary['total_runs'] - summary['successful_injections']
+        print(f"Failed (Defended) injections: {failed}")
         
         if summary.get('mitigation_effectiveness'):
             print("\n--- Mitigation Effectiveness ---")
@@ -256,7 +263,7 @@ async def cmd_run(args):
                 print(f"  {comparison['verdict']}")
                 print(f"  Improvement: {comparison['improvement']*100:.0f}%")
         
-        print(f"\nDetailed results saved to: {runner.output_dir}")
+        print(f"\nDetailed results saved to: {runner.logs_dir}")
         
     except Exception as e:
         print(f"\n✗ Experiments failed: {e}")
